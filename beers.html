@@ -25,12 +25,6 @@
     <!-- Summary cards -->
     <div class="beer-summary" id="beer-summary"></div>
 
-    <!-- Block results -->
-    <section class="card">
-      <div class="card-header"><h2>Block Results</h2></div>
-      <div id="block-results"><p class="empty">Loading...</p></div>
-    </section>
-
     <!-- Payment log -->
     <section class="card">
       <div class="card-header">
@@ -38,6 +32,14 @@
         <button class="btn btn-primary btn-sm" id="log-beer-btn">🍺 Log a Round</button>
       </div>
       <div id="payment-log"><p class="empty">No rounds logged yet.</p></div>
+      <div id="payment-pagination" class="pagination"></div>
+    </section>
+
+    <!-- Block results -->
+    <section class="card">
+      <div class="card-header"><h2>Block Results</h2></div>
+      <div id="block-results"><p class="empty">Loading...</p></div>
+      <div id="block-pagination" class="pagination"></div>
     </section>
   </main>
 

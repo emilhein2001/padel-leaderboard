@@ -15,7 +15,7 @@ async function init() {
   const { data: matches } = await db.from('matches').select('*, match_blocks(*)').order('played_at', { ascending: true });
   allMatches = matches || [];
 
-  document.getElementById('year-filter').addEventListener('click', async (e) => {
+  document.getElementById('year-filter').addEventListener('click', (e) => {
     const btn = e.target.closest('.filter-btn');
     if (!btn) return;
     document.querySelectorAll('#year-filter .filter-btn').forEach(b => b.classList.remove('active'));
@@ -35,7 +35,7 @@ function getFilteredMatches() {
 function render() {
   const matches = getFilteredMatches();
   renderTable(matches);
-  renderCharts(matches);
+  renderChart(matches);
 }
 
 function computeStats(matches) {
@@ -82,8 +82,7 @@ function renderTable(matches) {
     </table>`;
 }
 
-function renderCharts(matches) {
-  // Group into blocks of 6
+function renderChart(matches) {
   const blocks = [];
   for (let i = 0; i < matches.length; i += 6) blocks.push(matches.slice(i, i + 6));
   const blockLabels = blocks.map((_, i) => `Match ${i + 1}`);
@@ -91,7 +90,7 @@ function renderCharts(matches) {
   // Cumulative wins per block
   const cumWins = {};
   players.forEach(p => cumWins[p.id] = []);
-  let running = {};
+  const running = {};
   players.forEach(p => running[p.id] = 0);
 
   blocks.forEach(block => {
@@ -102,26 +101,8 @@ function renderCharts(matches) {
     players.forEach(p => cumWins[p.id].push(running[p.id]));
   });
 
-  // Points per block
-  const pointsPerBlock = {};
-  players.forEach(p => pointsPerBlock[p.id] = []);
-  blocks.forEach(block => {
-    const blockPts = {};
-    players.forEach(p => blockPts[p.id] = 0);
-    block.forEach(match => {
-      const t1s = match.match_blocks?.[0]?.team1_score || 0;
-      const t2s = match.match_blocks?.[0]?.team2_score || 0;
-      [match.team1_player1_id, match.team1_player2_id].forEach(id => { if (blockPts[id] !== undefined) blockPts[id] += t1s; });
-      [match.team2_player1_id, match.team2_player2_id].forEach(id => { if (blockPts[id] !== undefined) blockPts[id] += t2s; });
-    });
-    players.forEach(p => pointsPerBlock[p.id].push(blockPts[p.id]));
-  });
-
-  const stats = computeStats(matches);
-
   destroyCharts();
 
-  // Chart 1: Cumulative wins
   charts.wins = new Chart(document.getElementById('chart-wins'), {
     type: 'line',
     data: {
@@ -129,74 +110,23 @@ function renderCharts(matches) {
       datasets: players.map((p, i) => ({
         label: p.name,
         data: cumWins[p.id],
-        borderColor: COLORS[i],
-        backgroundColor: COLORS[i] + '20',
+        borderColor: COLORS[i % COLORS.length],
+        backgroundColor: COLORS[i % COLORS.length] + '20',
         tension: 0.3,
         fill: false,
         pointRadius: 5,
       }))
     },
-    options: chartOptions('Wins')
-  });
-
-  // Chart 2: Win rate bar
-  charts.winrate = new Chart(document.getElementById('chart-winrate'), {
-    type: 'bar',
-    data: {
-      labels: stats.map(p => p.name),
-      datasets: [{
-        label: 'Win Rate %',
-        data: stats.map(p => p.played > 0 ? Math.round((p.wins / p.played) * 100) : 0),
-        backgroundColor: players.map((_, i) => COLORS[i % COLORS.length] + 'cc'),
-        borderRadius: 6,
-      }]
-    },
-    options: chartOptions('%', true)
-  });
-
-  // Chart 3: Points per block
-  charts.points = new Chart(document.getElementById('chart-points'), {
-    type: 'bar',
-    data: {
-      labels: blockLabels,
-      datasets: players.map((p, i) => ({
-        label: p.name,
-        data: pointsPerBlock[p.id],
-        backgroundColor: COLORS[i] + 'cc',
-        borderRadius: 4,
-      }))
-    },
-    options: { ...chartOptions('Points'), plugins: { ...chartOptions('Points').plugins }, scales: { x: { stacked: false, ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }, y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } } } }
-  });
-
-  // Chart 4: Double faults
-  charts.df = new Chart(document.getElementById('chart-df'), {
-    type: 'doughnut',
-    data: {
-      labels: stats.map(p => p.name),
-      datasets: [{
-        data: stats.map(p => p.doubleFaults),
-        backgroundColor: players.map((_, i) => COLORS[i % COLORS.length] + 'cc'),
-        borderWidth: 0,
-      }]
-    },
     options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { labels: { color: '#f1f5f9', font: { size: 12 } } } }
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#f1f5f9', font: { size: 12 } } } },
+      scales: {
+        x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: '#334155' } },
+        y: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: '#334155' }, beginAtZero: true }
+      }
     }
   });
-}
-
-function chartOptions(yLabel, horizontal = false) {
-  return {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { labels: { color: '#f1f5f9', font: { size: 11 } } } },
-    scales: {
-      x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: '#334155' } },
-      y: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: '#334155' }, beginAtZero: true }
-    }
-  };
 }
 
 function destroyCharts() {

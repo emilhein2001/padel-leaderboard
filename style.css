@@ -186,10 +186,11 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
 .h2h-lose { color: var(--danger); }
 
 /* ── PLAYERS PAGE ── */
-.player-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+.player-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; }
+@media (max-width: 600px) { .player-grid { grid-template-columns: 1fr; } }
 .player-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; text-align: center; position: relative; }
 .player-card-header { position: relative; margin-bottom: 1rem; }
-.player-avatar { font-size: 4rem; line-height: 1; margin-bottom: 0.5rem; }
+.player-avatar-svg { width: 80px; height: 80px; border-radius: 50%; display: block; margin: 0 auto 0.5rem; }
 .player-rank-badge { position: absolute; top: 0; right: 0; font-size: 1.4rem; }
 .player-card-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.2rem; }
 .player-card-nickname { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.25rem; }
@@ -197,12 +198,46 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
 .player-stat { background: var(--bg); border-radius: 10px; padding: 0.6rem 0.5rem; }
 .player-stat-value { font-size: 1.2rem; font-weight: 700; }
 .player-stat-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-top: 0.1rem; }
-.player-partner { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 0.85rem; margin-top: 0.25rem; }
-.player-df { font-size: 0.78rem; color: var(--muted); margin-top: 0.5rem; }
+.player-info-table { border-top: 1px solid var(--border); padding-top: 0.9rem; margin-top: 0.25rem; display: flex; flex-direction: column; gap: 0.45rem; text-align: left; }
+.player-info-row { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; font-size: 0.8rem; }
+.player-info-label { color: var(--muted); white-space: nowrap; }
+.player-info-value { font-weight: 500; text-align: right; }
+.player-partner { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 0.85rem; margin-top: 0.75rem; }
 
 /* ── STATS PAGE ── */
-.streak-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
-.streak-win { background: rgba(34,197,94,0.15); color: var(--accent); }
-.streak-lose { background: rgba(239,68,68,0.15); color: var(--danger); }
+.h2h-list { padding: 0 1.5rem; }
+.h2h-matchup { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; padding: 0.9rem 0; border-bottom: 1px solid var(--border); }
+.h2h-matchup:last-child { border-bottom: none; }
+.h2h-side { padding: 0.65rem 1rem; border-radius: 10px; }
+.h2h-green { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25); }
+.h2h-red { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); }
+.h2h-pair-name { font-weight: 600; font-size: 0.88rem; }
+.h2h-winrate { font-size: 0.82rem; margin-top: 0.2rem; color: var(--muted); }
+.h2h-green .h2h-winrate { color: var(--accent); }
+.h2h-red .h2h-winrate { color: var(--danger); }
+.h2h-center { text-align: center; }
+.h2h-vs-label { color: var(--muted); font-size: 0.75rem; font-weight: 700; }
+.h2h-games-label { color: var(--muted); font-size: 0.68rem; margin-top: 0.15rem; }
+
+.avg-list { padding: 0 1.5rem; }
+.avg-score-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.85rem 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.avg-score-row:last-child { border-bottom: none; }
+.avg-team { font-weight: 600; font-size: 0.88rem; flex: 1; min-width: 110px; }
+.avg-team-right { text-align: right; }
+.avg-val { font-size: 1.1rem; font-weight: 700; color: var(--accent); min-width: 36px; text-align: center; }
+.avg-vs { color: var(--muted); font-size: 0.78rem; }
+.avg-games { color: var(--muted); font-size: 0.72rem; background: var(--bg); padding: 0.15rem 0.5rem; border-radius: 20px; margin-left: auto; }
+
+/* ── CURRENT BLOCK / BEER ANALYSIS ── */
+.beer-analysis-box { margin: 0.75rem 1.5rem 1rem; padding: 1rem 1.25rem; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 10px; font-size: 0.86rem; line-height: 1.7; }
+.beer-analysis-done { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.25); }
+.leaderboard-table tr.beer-row td { color: var(--danger); }
+.leaderboard-table tr.beer-row { background: rgba(239,68,68,0.05); }
+
+/* ── PAGINATION ── */
+.pagination { display: flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.75rem 0; flex-wrap: wrap; }
+.page-btn { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 0.3rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: all 0.15s; }
+.page-btn:hover { border-color: var(--accent); color: var(--accent); }
+.page-btn.active { background: var(--accent); color: #0f172a; border-color: var(--accent); font-weight: 700; }
 
 .empty { padding: 2rem; text-align: center; color: var(--muted); }
