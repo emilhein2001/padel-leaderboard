@@ -107,7 +107,7 @@ async function loadLeaderboard(year = 2026) {
 
   document.getElementById('leaderboard').innerHTML = `
     <table class="leaderboard-table">
-      <thead><tr><th>#</th><th>Player</th><th>Played</th><th>Wins</th><th>Losses</th><th>Win Rate</th><th>DF</th></tr></thead>
+      <thead><tr><th>#</th><th>Player</th><th>Played</th><th>Wins</th><th>Win Rate</th><th>DF</th></tr></thead>
       <tbody>
         ${sorted.map((p, i) => `
           <tr>
@@ -115,7 +115,6 @@ async function loadLeaderboard(year = 2026) {
             <td class="player-name">${p.name}</td>
             <td>${p.played}</td>
             <td class="wins">${p.wins}</td>
-            <td class="losses">${p.losses}</td>
             <td>${p.played > 0 ? Math.round((p.wins / p.played) * 100) + '%' : '-'}</td>
             <td class="df-count">${p.doubleFaults}</td>
           </tr>`).join('')}
@@ -127,8 +126,7 @@ async function loadMatchHistory(year = 2026) {
   let query = db
     .from('matches')
     .select('*, match_blocks(*)')
-    .order('played_at', { ascending: false })
-    .limit(20);
+    .order('played_at', { ascending: true });
 
   if (year !== 'all') {
     query = query
@@ -146,39 +144,57 @@ async function loadMatchHistory(year = 2026) {
 
   const getName = (id) => players.find(p => p.id === id)?.name || '?';
 
-  historyEl.innerHTML = matches.map(m => {
-    const sets = (m.match_blocks || []).sort((a, b) => a.block_number - b.block_number);
-    const setsStr = sets.map(s => `${s.team1_score}-${s.team2_score}`).join('  ');
-    const date = new Date(m.played_at).toLocaleDateString('en-GB');
+  // Group into blocks of 6
+  const blocks = [];
+  for (let i = 0; i < matches.length; i += 6) {
+    blocks.push(matches.slice(i, i + 6));
+  }
+  const totalBlocks = blocks.length;
+  blocks.reverse(); // newest block first
 
-    const dfs = [
-      { name: getName(m.team1_player1_id), df: m.t1p1_df },
-      { name: getName(m.team1_player2_id), df: m.t1p2_df },
-      { name: getName(m.team2_player1_id), df: m.t2p1_df },
-      { name: getName(m.team2_player2_id), df: m.t2p2_df },
-    ].filter(x => x.df > 0);
-    const dfStr = dfs.length > 0
-      ? `⚡ ${dfs.map(x => `${x.name}: ${x.df}`).join(', ')}`
-      : '';
+  historyEl.innerHTML = blocks.map((block, blockIdx) => {
+    const blockNumber = totalBlocks - blockIdx;
+
+    const matchesHTML = block.map(m => {
+      const sets = (m.match_blocks || []).sort((a, b) => a.block_number - b.block_number);
+      const setsStr = sets.map(s => `${s.team1_score}-${s.team2_score}`).join('  ');
+      const date = new Date(m.played_at).toLocaleDateString('en-GB');
+
+      const dfs = [
+        { name: getName(m.team1_player1_id), df: m.t1p1_df },
+        { name: getName(m.team1_player2_id), df: m.t1p2_df },
+        { name: getName(m.team2_player1_id), df: m.t2p1_df },
+        { name: getName(m.team2_player2_id), df: m.t2p2_df },
+      ].filter(x => x.df > 0);
+      const dfStr = dfs.length > 0
+        ? `⚡ ${dfs.map(x => `${x.name}: ${x.df}`).join(', ')}`
+        : '';
+
+      return `
+        <div class="match-card">
+          <div class="match-teams">
+            <div class="team ${m.winner_team === 1 ? 'winner' : ''}">
+              ${getName(m.team1_player1_id)} & ${getName(m.team1_player2_id)}
+              ${m.winner_team === 1 ? '<span class="win-badge">WIN</span>' : ''}
+            </div>
+            <div class="match-vs">vs</div>
+            <div class="team ${m.winner_team === 2 ? 'winner' : ''}">
+              ${getName(m.team2_player1_id)} & ${getName(m.team2_player2_id)}
+              ${m.winner_team === 2 ? '<span class="win-badge">WIN</span>' : ''}
+            </div>
+          </div>
+          <div class="match-meta">
+            <span class="match-sets">${setsStr}</span>
+            <span class="match-date">${date}</span>
+          </div>
+          ${dfStr ? `<div class="match-df">${dfStr}</div>` : ''}
+        </div>`;
+    }).join('');
 
     return `
-      <div class="match-card">
-        <div class="match-teams">
-          <div class="team ${m.winner_team === 1 ? 'winner' : ''}">
-            ${getName(m.team1_player1_id)} & ${getName(m.team1_player2_id)}
-            ${m.winner_team === 1 ? '<span class="win-badge">WIN</span>' : ''}
-          </div>
-          <div class="match-vs">vs</div>
-          <div class="team ${m.winner_team === 2 ? 'winner' : ''}">
-            ${getName(m.team2_player1_id)} & ${getName(m.team2_player2_id)}
-            ${m.winner_team === 2 ? '<span class="win-badge">WIN</span>' : ''}
-          </div>
-        </div>
-        <div class="match-meta">
-          <span class="match-sets">${setsStr}</span>
-          <span class="match-date">${date}</span>
-        </div>
-        ${dfStr ? `<div class="match-df">${dfStr}</div>` : ''}
+      <div class="match-block">
+        <div class="match-block-header">Match ${blockNumber}</div>
+        ${matchesHTML}
       </div>`;
   }).join('');
 }

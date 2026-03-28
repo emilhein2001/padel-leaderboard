@@ -100,6 +100,11 @@ header { background: var(--card); border-bottom: 1px solid var(--border); paddin
 .set-row span:first-child { width: 90px; font-size: 0.875rem; color: var(--muted); }
 .set-row input { width: 60px; text-align: center; }
 
+/* Match blocks */
+.match-block-header { padding: 0.6rem 1.5rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); background: rgba(255,255,255,0.03); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.match-block:first-child .match-block-header { border-top: none; }
+.match-block .match-card:first-child { border-top: none; }
+
 /* Double faults */
 .df-section { margin-top: 1.25rem; border-top: 1px solid var(--border); padding-top: 1rem; }
 .df-section summary { font-size: 0.8rem; font-weight: 600; color: var(--muted); cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; user-select: none; }
