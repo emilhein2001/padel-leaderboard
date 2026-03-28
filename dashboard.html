@@ -65,27 +65,16 @@
           </div>
         </div>
 
-        <div class="sets-section">
-          <h3>Sets</h3>
-          <div class="set-row">
-            <span>Set 1</span>
-            <input type="number" id="s1t1" min="0" max="7" placeholder="0" required>
-            <span>-</span>
-            <input type="number" id="s1t2" min="0" max="7" placeholder="0" required>
-          </div>
-          <div class="set-row">
-            <span>Set 2</span>
-            <input type="number" id="s2t1" min="0" max="7" placeholder="0" required>
-            <span>-</span>
-            <input type="number" id="s2t2" min="0" max="7" placeholder="0" required>
-          </div>
-          <div class="set-row">
-            <span>Set 3 <small>(optional)</small></span>
-            <input type="number" id="s3t1" min="0" max="7" placeholder="0">
-            <span>-</span>
-            <input type="number" id="s3t2" min="0" max="7" placeholder="0">
-          </div>
-        </div>
+<div class="sets-section">
+  <h3>Score</h3>
+  <div class="set-row">
+    <span>Team 1</span>
+    <input type="number" id="s1t1" min="0" max="99" placeholder="0" required>
+    <span>-</span>
+    <input type="number" id="s1t2" min="0" max="99" placeholder="0" required>
+    <span>Team 2</span>
+  </div>
+</div>
 
         <p id="match-error" class="error-msg hidden"></p>
         <button type="submit" class="btn btn-primary btn-full">Save Match</button>
