@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard · Padel Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+  <main class="container-wide">
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+        <div>
+          <div class="page-title">🏆 Leaderboard</div>
+          <div class="page-subtitle">Rankings and player performance over time</div>
+        </div>
+        <div class="year-filter" id="year-filter">
+          <button class="filter-btn active" data-year="2026">2026</button>
+          <button class="filter-btn" data-year="2025">2025</button>
+          <button class="filter-btn" data-year="2024">2024</button>
+          <button class="filter-btn" data-year="all">All‑time</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="card">
+      <div class="card-header"><h2>Rankings</h2></div>
+      <div id="leaderboard-table"><p class="empty">Loading...</p></div>
+    </section>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>Cumulative Wins per Block</h3>
+        <div class="chart-wrap"><canvas id="chart-wins"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Win Rate Comparison</h3>
+        <div class="chart-wrap"><canvas id="chart-winrate"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Points Scored per Block</h3>
+        <div class="chart-wrap"><canvas id="chart-points"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Double Faults Total</h3>
+        <div class="chart-wrap"><canvas id="chart-df"></canvas></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/leaderboard.js"></script>
+</body>
+</html>
