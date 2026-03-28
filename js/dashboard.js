@@ -4,12 +4,9 @@ let leaderboardYear = 2026;
 let historyYear = 2026;
 
 async function init() {
-  const { data: { session } } = await db.auth.getSession();
-  if (!session) { window.location.href = 'index.html'; return; }
+  const session = await initNav();
+  if (!session) return;
   currentUser = session.user;
-
-  const { data: playerData } = await db.from('players').select('name').eq('id', currentUser.id).single();
-  if (playerData) document.getElementById('user-name').textContent = playerData.name;
 
   await loadPlayers();
   await loadLeaderboard(leaderboardYear);
@@ -49,7 +46,6 @@ function updateDFLabels() {
 async function loadPlayers() {
   const { data } = await db.from('players').select('*').order('name');
   players = data || [];
-
   ['t1p1', 't1p2', 't2p1', 't2p2'].forEach(id => {
     const sel = document.getElementById(id);
     sel.innerHTML = '<option value="">Select player</option>';
@@ -65,45 +61,26 @@ async function loadPlayers() {
 
 async function loadLeaderboard(year = 2026) {
   let query = db.from('matches').select('*');
-  if (year !== 'all') {
-    query = query
-      .gte('played_at', `${year}-01-01T00:00:00`)
-      .lte('played_at', `${year}-12-31T23:59:59`);
-  }
+  if (year !== 'all') query = query.gte('played_at', `${year}-01-01T00:00:00`).lte('played_at', `${year}-12-31T23:59:59`);
   const { data: matches } = await query;
 
   const stats = {};
   players.forEach(p => { stats[p.id] = { name: p.name, played: 0, wins: 0, losses: 0, doubleFaults: 0 }; });
 
   (matches || []).forEach(match => {
-    const team1 = [
-      { id: match.team1_player1_id, df: match.t1p1_df || 0 },
-      { id: match.team1_player2_id, df: match.t1p2_df || 0 }
-    ];
-    const team2 = [
-      { id: match.team2_player1_id, df: match.t2p1_df || 0 },
-      { id: match.team2_player2_id, df: match.t2p2_df || 0 }
-    ];
-
-    team1.forEach(({ id: pid, df }) => {
-      if (!stats[pid]) return;
-      stats[pid].played++;
-      stats[pid].doubleFaults += df;
-      match.winner_team === 1 ? stats[pid].wins++ : stats[pid].losses++;
+    [{ id: match.team1_player1_id, df: match.t1p1_df || 0 }, { id: match.team1_player2_id, df: match.t1p2_df || 0 }].forEach(({ id, df }) => {
+      if (!stats[id]) return;
+      stats[id].played++; stats[id].doubleFaults += df;
+      match.winner_team === 1 ? stats[id].wins++ : stats[id].losses++;
     });
-    team2.forEach(({ id: pid, df }) => {
-      if (!stats[pid]) return;
-      stats[pid].played++;
-      stats[pid].doubleFaults += df;
-      match.winner_team === 2 ? stats[pid].wins++ : stats[pid].losses++;
+    [{ id: match.team2_player1_id, df: match.t2p1_df || 0 }, { id: match.team2_player2_id, df: match.t2p2_df || 0 }].forEach(({ id, df }) => {
+      if (!stats[id]) return;
+      stats[id].played++; stats[id].doubleFaults += df;
+      match.winner_team === 2 ? stats[id].wins++ : stats[id].losses++;
     });
   });
 
-  const sorted = Object.values(stats).sort((a, b) =>
-    b.wins - a.wins ||
-    a.losses - b.losses ||
-    a.doubleFaults - b.doubleFaults
-  );
+  const sorted = Object.values(stats).sort((a, b) => b.wins - a.wins || a.losses - b.losses || a.doubleFaults - b.doubleFaults);
 
   document.getElementById('leaderboard').innerHTML = `
     <table class="leaderboard-table">
@@ -123,129 +100,74 @@ async function loadLeaderboard(year = 2026) {
 }
 
 async function loadMatchHistory(year = 2026) {
-  let query = db
-    .from('matches')
-    .select('*, match_blocks(*)')
-    .order('played_at', { ascending: true });
-
-  if (year !== 'all') {
-    query = query
-      .gte('played_at', `${year}-01-01T00:00:00`)
-      .lte('played_at', `${year}-12-31T23:59:59`);
-  }
-
+  let query = db.from('matches').select('*, match_blocks(*)').order('played_at', { ascending: true });
+  if (year !== 'all') query = query.gte('played_at', `${year}-01-01T00:00:00`).lte('played_at', `${year}-12-31T23:59:59`);
   const { data: matches } = await query;
+
   const historyEl = document.getElementById('match-history');
+  if (!matches || matches.length === 0) { historyEl.innerHTML = '<p class="empty">No matches yet — log your first one! 🎾</p>'; return; }
 
-  if (!matches || matches.length === 0) {
-    historyEl.innerHTML = '<p class="empty">No matches yet — log your first one! 🎾</p>';
-    return;
-  }
-
-  const getName = (id) => players.find(p => p.id === id)?.name || '?';
-
-  // Group into blocks of 6
+  const getName = id => players.find(p => p.id === id)?.name || '?';
   const blocks = [];
-  for (let i = 0; i < matches.length; i += 6) {
-    blocks.push(matches.slice(i, i + 6));
-  }
+  for (let i = 0; i < matches.length; i += 6) blocks.push(matches.slice(i, i + 6));
   const totalBlocks = blocks.length;
-  blocks.reverse(); // newest block first
+  blocks.reverse();
 
-  historyEl.innerHTML = blocks.map((block, blockIdx) => {
-    const blockNumber = totalBlocks - blockIdx;
-
-    const matchesHTML = block.map(m => {
-      const sets = (m.match_blocks || []).sort((a, b) => a.block_number - b.block_number);
-      const setsStr = sets.map(s => `${s.team1_score}-${s.team2_score}`).join('  ');
-      const date = new Date(m.played_at).toLocaleDateString('en-GB');
-
-      const dfs = [
-        { name: getName(m.team1_player1_id), df: m.t1p1_df },
-        { name: getName(m.team1_player2_id), df: m.t1p2_df },
-        { name: getName(m.team2_player1_id), df: m.t2p1_df },
-        { name: getName(m.team2_player2_id), df: m.t2p2_df },
-      ].filter(x => x.df > 0);
-      const dfStr = dfs.length > 0
-        ? `⚡ ${dfs.map(x => `${x.name}: ${x.df}`).join(', ')}`
-        : '';
-
-      return `
-        <div class="match-card">
+  historyEl.innerHTML = blocks.map((block, bi) => {
+    const blockNumber = totalBlocks - bi;
+    return `<div class="match-block">
+      <div class="match-block-header">Match ${blockNumber}</div>
+      ${block.map(m => {
+        const sets = (m.match_blocks || []).sort((a, b) => a.block_number - b.block_number);
+        const setsStr = sets.map(s => `${s.team1_score}-${s.team2_score}`).join('  ');
+        const date = new Date(m.played_at).toLocaleDateString('en-GB');
+        const dfs = [
+          { name: getName(m.team1_player1_id), df: m.t1p1_df },
+          { name: getName(m.team1_player2_id), df: m.t1p2_df },
+          { name: getName(m.team2_player1_id), df: m.t2p1_df },
+          { name: getName(m.team2_player2_id), df: m.t2p2_df },
+        ].filter(x => x.df > 0);
+        const dfStr = dfs.length > 0 ? `⚡ ${dfs.map(x => `${x.name}: ${x.df}`).join(', ')}` : '';
+        return `<div class="match-card">
           <div class="match-teams">
-            <div class="team ${m.winner_team === 1 ? 'winner' : ''}">
-              ${getName(m.team1_player1_id)} & ${getName(m.team1_player2_id)}
-              ${m.winner_team === 1 ? '<span class="win-badge">WIN</span>' : ''}
-            </div>
+            <div class="team ${m.winner_team === 1 ? 'winner' : ''}">${getName(m.team1_player1_id)} & ${getName(m.team1_player2_id)}${m.winner_team === 1 ? ' <span class="win-badge">WIN</span>' : ''}</div>
             <div class="match-vs">vs</div>
-            <div class="team ${m.winner_team === 2 ? 'winner' : ''}">
-              ${getName(m.team2_player1_id)} & ${getName(m.team2_player2_id)}
-              ${m.winner_team === 2 ? '<span class="win-badge">WIN</span>' : ''}
-            </div>
+            <div class="team ${m.winner_team === 2 ? 'winner' : ''}">${getName(m.team2_player1_id)} & ${getName(m.team2_player2_id)}${m.winner_team === 2 ? ' <span class="win-badge">WIN</span>' : ''}</div>
           </div>
-          <div class="match-meta">
-            <span class="match-sets">${setsStr}</span>
-            <span class="match-date">${date}</span>
-          </div>
+          <div class="match-meta"><span class="match-sets">${setsStr}</span><span class="match-date">${date}</span></div>
           ${dfStr ? `<div class="match-df">${dfStr}</div>` : ''}
         </div>`;
-    }).join('');
-
-    return `
-      <div class="match-block">
-        <div class="match-block-header">Match ${blockNumber}</div>
-        ${matchesHTML}
-      </div>`;
+      }).join('')}
+    </div>`;
   }).join('');
 }
 
 // Modal
-document.getElementById('log-match-btn').addEventListener('click', () => {
-  document.getElementById('modal-overlay').classList.remove('hidden');
-});
-document.getElementById('modal-close').addEventListener('click', () => {
-  document.getElementById('modal-overlay').classList.add('hidden');
-});
-document.getElementById('modal-overlay').addEventListener('click', (e) => {
-  if (e.target === document.getElementById('modal-overlay'))
-    document.getElementById('modal-overlay').classList.add('hidden');
-});
+document.getElementById('log-match-btn').addEventListener('click', () => document.getElementById('modal-overlay').classList.remove('hidden'));
+document.getElementById('modal-close').addEventListener('click', () => document.getElementById('modal-overlay').classList.add('hidden'));
+document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.add('hidden'); });
 
 document.getElementById('match-form').addEventListener('submit', async (e) => {
   e.preventDefault();
+  const t1p1 = document.getElementById('t1p1').value, t1p2 = document.getElementById('t1p2').value;
+  const t2p1 = document.getElementById('t2p1').value, t2p2 = document.getElementById('t2p2').value;
 
-  const t1p1 = document.getElementById('t1p1').value;
-  const t1p2 = document.getElementById('t1p2').value;
-  const t2p1 = document.getElementById('t2p1').value;
-  const t2p2 = document.getElementById('t2p2').value;
+  if (new Set([t1p1, t1p2, t2p1, t2p2]).size !== 4) { showMatchError('Each player can only appear once!'); return; }
 
-  if (new Set([t1p1, t1p2, t2p1, t2p2]).size !== 4) {
-    showMatchError('Each player can only appear once per match!'); return;
-  }
-
-  const s1t1 = +document.getElementById('s1t1').value;
-  const s1t2 = +document.getElementById('s1t2').value;
+  const s1t1 = +document.getElementById('s1t1').value, s1t2 = +document.getElementById('s1t2').value;
   const sets = [{ block_number: 1, team1_score: s1t1, team2_score: s1t2 }];
   const winner_team = s1t1 > s1t2 ? 1 : 2;
-
-  const t1p1_df = +document.getElementById('df-t1p1').value || 0;
-  const t1p2_df = +document.getElementById('df-t1p2').value || 0;
-  const t2p1_df = +document.getElementById('df-t2p1').value || 0;
-  const t2p2_df = +document.getElementById('df-t2p2').value || 0;
+  const t1p1_df = +document.getElementById('df-t1p1').value || 0, t1p2_df = +document.getElementById('df-t1p2').value || 0;
+  const t2p1_df = +document.getElementById('df-t2p1').value || 0, t2p2_df = +document.getElementById('df-t2p2').value || 0;
 
   const { data: matchData, error: matchError } = await db.from('matches').insert({
-    team1_player1_id: t1p1, team1_player2_id: t1p2,
-    team2_player1_id: t2p1, team2_player2_id: t2p2,
-    winner_team, created_by: currentUser.id,
-    t1p1_df, t1p2_df, t2p1_df, t2p2_df
+    team1_player1_id: t1p1, team1_player2_id: t1p2, team2_player1_id: t2p1, team2_player2_id: t2p2,
+    winner_team, created_by: currentUser.id, t1p1_df, t1p2_df, t2p1_df, t2p2_df
   }).select().single();
+  if (matchError) { showMatchError('Error saving match.'); return; }
 
-  if (matchError) { showMatchError('Error saving match. Try again.'); return; }
-
-  const { error: blocksError } = await db.from('match_blocks')
-    .insert(sets.map(s => ({ ...s, match_id: matchData.id })));
-
-  if (blocksError) { showMatchError('Error saving set scores. Try again.'); return; }
+  const { error: blocksError } = await db.from('match_blocks').insert(sets.map(s => ({ ...s, match_id: matchData.id })));
+  if (blocksError) { showMatchError('Error saving score.'); return; }
 
   document.getElementById('modal-overlay').classList.add('hidden');
   document.getElementById('match-form').reset();
@@ -255,13 +177,7 @@ document.getElementById('match-form').addEventListener('submit', async (e) => {
 
 function showMatchError(msg) {
   const el = document.getElementById('match-error');
-  el.textContent = msg;
-  el.classList.remove('hidden');
+  el.textContent = msg; el.classList.remove('hidden');
 }
-
-document.getElementById('logout-btn').addEventListener('click', async () => {
-  await db.auth.signOut();
-  window.location.href = 'index.html';
-});
 
 init();

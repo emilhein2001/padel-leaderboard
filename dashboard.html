@@ -7,15 +7,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <div class="header-inner">
-      <div class="header-logo">🎾 Padel Tracker</div>
-      <div class="header-user">
-        <span id="user-name"></span>
-        <button class="btn btn-outline" id="logout-btn">Logout</button>
-      </div>
-    </div>
-  </header>
+  <div id="nav-placeholder"></div>
 
   <main class="container">
     <section class="card">
@@ -47,7 +39,7 @@
     </section>
   </main>
 
-  <!-- Modal -->
+  <!-- Log Match Modal -->
   <div class="modal-overlay hidden" id="modal-overlay">
     <div class="modal">
       <div class="modal-header">
@@ -80,40 +72,25 @@
             </div>
           </div>
         </div>
-
-<div class="sets-section">
-  <h3>Score</h3>
-  <div class="set-row">
-    <span>Team 1</span>
-    <input type="number" id="s1t1" min="0" max="99" placeholder="0" required>
-    <span>-</span>
-    <input type="number" id="s1t2" min="0" max="99" placeholder="0" required>
-    <span>Team 2</span>
-  </div>
-</div>
-
+        <div class="sets-section">
+          <h3>Score</h3>
+          <div class="set-row">
+            <span>Team 1</span>
+            <input type="number" id="s1t1" min="0" max="99" placeholder="0" required>
+            <span>-</span>
+            <input type="number" id="s1t2" min="0" max="99" placeholder="0" required>
+            <span>Team 2</span>
+          </div>
+        </div>
         <details class="df-section">
           <summary>⚡ Double Faults <small>(optional)</small></summary>
           <div class="df-grid">
-            <div class="df-item">
-              <label id="df-label-t1p1">Team 1 · P1</label>
-              <input type="number" id="df-t1p1" min="0" value="0">
-            </div>
-            <div class="df-item">
-              <label id="df-label-t1p2">Team 1 · P2</label>
-              <input type="number" id="df-t1p2" min="0" value="0">
-            </div>
-            <div class="df-item">
-              <label id="df-label-t2p1">Team 2 · P1</label>
-              <input type="number" id="df-t2p1" min="0" value="0">
-            </div>
-            <div class="df-item">
-              <label id="df-label-t2p2">Team 2 · P2</label>
-              <input type="number" id="df-t2p2" min="0" value="0">
-            </div>
+            <div class="df-item"><label id="df-label-t1p1">Team 1 · P1</label><input type="number" id="df-t1p1" min="0" value="0"></div>
+            <div class="df-item"><label id="df-label-t1p2">Team 1 · P2</label><input type="number" id="df-t1p2" min="0" value="0"></div>
+            <div class="df-item"><label id="df-label-t2p1">Team 2 · P1</label><input type="number" id="df-t2p1" min="0" value="0"></div>
+            <div class="df-item"><label id="df-label-t2p2">Team 2 · P2</label><input type="number" id="df-t2p2" min="0" value="0"></div>
           </div>
         </details>
-
         <p id="match-error" class="error-msg hidden"></p>
         <button type="submit" class="btn btn-primary btn-full">Save Match</button>
       </form>
@@ -122,6 +99,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js"></script>
+  <script src="js/nav.js"></script>
   <script src="js/dashboard.js"></script>
 </body>
 </html>
