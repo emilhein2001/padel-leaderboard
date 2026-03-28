@@ -91,8 +91,6 @@ function render() {
     const s = p.stats;
     const age = calcAge(p.birth_date);
     const bestPartner = getBestPartner(p.id);
-    const rankLabel = ['🥇', '🥈', '🥉', '4️⃣'][rank] || `${rank + 1}`;
-
     const infoRows = [
       p.full_name ? ['Full name', p.full_name] : null,
       (p.gender && age) ? ['Info', `${p.gender}, ${age} years old`] : (age ? ['Age', `${age} years old`] : null),
@@ -104,7 +102,6 @@ function render() {
       <div class="player-card">
         <div class="player-card-header">
           ${avatarSVG}
-          <div class="player-rank-badge">${rankLabel}</div>
         </div>
         <div class="player-card-name">${p.name}</div>
         ${p.full_name ? `<div class="player-card-nickname">${p.full_name}</div>` : ''}
