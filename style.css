@@ -1,0 +1,99 @@
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --border: #334155;
+  --accent: #22c55e;
+  --accent-dark: #16a34a;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --danger: #ef4444;
+  --blue: #3b82f6;
+  --amber: #f59e0b;
+}
+
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+
+/* Auth */
+.auth-page { display: flex; align-items: center; justify-content: center; }
+.auth-container { width: 100%; max-width: 400px; padding: 1rem; }
+.auth-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; text-align: center; }
+.logo { font-size: 3rem; margin-bottom: 0.5rem; }
+.auth-card h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+.subtitle { color: var(--muted); margin-bottom: 2rem; }
+
+/* Forms */
+.form-group { margin-bottom: 1rem; text-align: left; }
+.form-group label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.375rem; color: var(--muted); }
+input, select { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 0.625rem 0.875rem; color: var(--text); font-size: 1rem; transition: border-color 0.2s; }
+input:focus, select:focus { outline: none; border-color: var(--accent); }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.625rem 1.25rem; border-radius: 8px; font-size: 0.925rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: var(--accent); color: #000; }
+.btn-primary:hover { background: var(--accent-dark); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-full { width: 100%; margin-top: 0.5rem; }
+.btn-lg { width: 100%; padding: 0.875rem; font-size: 1rem; }
+
+.error-msg { color: var(--danger); font-size: 0.875rem; margin-top: 0.75rem; }
+.hidden { display: none !important; }
+
+/* Header */
+header { background: var(--card); border-bottom: 1px solid var(--border); padding: 1rem; position: sticky; top: 0; z-index: 10; }
+.header-inner { max-width: 800px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+.header-logo { font-size: 1.25rem; font-weight: 700; }
+.header-user { display: flex; align-items: center; gap: 0.75rem; color: var(--muted); font-size: 0.875rem; }
+
+/* Layout */
+.container { max-width: 800px; margin: 0 auto; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+/* Cards */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); }
+.card-header h2 { font-size: 1.125rem; font-weight: 600; }
+
+/* Leaderboard */
+.leaderboard-table { width: 100%; border-collapse: collapse; }
+.leaderboard-table th { text-align: left; padding: 0.75rem 1.5rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.leaderboard-table td { padding: 0.875rem 1.5rem; border-top: 1px solid var(--border); }
+.rank { font-size: 1.1rem; }
+.player-name { font-weight: 600; }
+.wins { color: var(--accent); font-weight: 600; }
+.losses { color: var(--danger); }
+
+/* Match cards */
+.match-card { padding: 1rem 1.5rem; border-top: 1px solid var(--border); }
+.match-card:first-child { border-top: none; }
+.match-teams { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+.team { flex: 1; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; }
+.team.winner { font-weight: 700; color: var(--accent); }
+.match-vs { color: var(--muted); font-size: 0.8rem; font-weight: 600; }
+.win-badge { background: var(--accent); color: #000; font-size: 0.65rem; font-weight: 700; padding: 0.15rem 0.4rem; border-radius: 4px; }
+.match-meta { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--muted); }
+
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
+.modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); }
+.modal-header h2 { font-size: 1.125rem; font-weight: 600; }
+.modal-close { background: none; border: none; color: var(--muted); font-size: 1.75rem; cursor: pointer; line-height: 1; }
+.modal form { padding: 1.5rem; }
+
+/* Teams grid in modal */
+.teams-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: start; margin-bottom: 1.5rem; }
+.team-section h3 { font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+.team1-label { color: var(--blue); }
+.team2-label { color: var(--amber); }
+.vs { display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--muted); padding-top: 2rem; }
+
+/* Sets */
+.sets-section h3 { font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.75rem; }
+.set-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.625rem; }
+.set-row span:first-child { width: 90px; font-size: 0.875rem; color: var(--muted); }
+.set-row input { width: 60px; text-align: center; }
+
+.empty { padding: 2rem; text-align: center; color: var(--muted); }
