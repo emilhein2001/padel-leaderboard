@@ -53,8 +53,12 @@ header { background: var(--card); border-bottom: 1px solid var(--border); paddin
 
 /* Cards */
 .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
-.card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); }
+.card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; }
 .card-header h2 { font-size: 1.125rem; font-weight: 600; }
+.year-filter { display: flex; gap: 0.375rem; }
+.filter-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.25rem 0.625rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+.filter-btn.active { background: var(--accent); border-color: var(--accent); color: #000; }
 
 /* Leaderboard */
 .leaderboard-table { width: 100%; border-collapse: collapse; }
