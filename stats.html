@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stats · Padel Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+  <main class="container-wide">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <div class="page-title">📊 Statistics</div>
+        <div class="page-subtitle">Deep dive into the numbers</div>
+      </div>
+      <div class="year-filter" id="year-filter">
+        <button class="filter-btn active" data-year="2026">2026</button>
+        <button class="filter-btn" data-year="2025">2025</button>
+        <button class="filter-btn" data-year="2024">2024</button>
+        <button class="filter-btn" data-year="all">All‑time</button>
+      </div>
+    </div>
+
+    <!-- Quick stats -->
+    <div class="stat-grid" id="quick-stats"></div>
+
+    <!-- H2H -->
+    <section class="card">
+      <div class="card-header"><h2>⚔️ Head to Head (by pair)</h2></div>
+      <div id="h2h-table"><p class="empty">Loading...</p></div>
+    </section>
+
+    <!-- Best/worst blocks -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+      <section class="card">
+        <div class="card-header"><h2>🔥 Best Blocks</h2></div>
+        <div id="best-blocks"><p class="empty">Loading...</p></div>
+      </section>
+      <section class="card">
+        <div class="card-header"><h2>❄️ Worst Blocks</h2></div>
+        <div id="worst-blocks"><p class="empty">Loading...</p></div>
+      </section>
+    </div>
+
+    <!-- Avg score -->
+    <section class="card">
+      <div class="card-header"><h2>📈 Average Score per Matchup</h2></div>
+      <div id="avg-score"><p class="empty">Loading...</p></div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/stats.js"></script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beer Counter · Padel Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+  <main class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <div class="page-title">🍺 Beer Counter</div>
+        <div class="page-subtitle">Who owes a round — and who's paid up</div>
+      </div>
+      <div class="year-filter" id="year-filter">
+        <button class="filter-btn active" data-year="2026">2026</button>
+        <button class="filter-btn" data-year="2025">2025</button>
+        <button class="filter-btn" data-year="2024">2024</button>
+        <button class="filter-btn" data-year="all">All‑time</button>
+      </div>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="beer-summary" id="beer-summary"></div>
+
+    <!-- Block results -->
+    <section class="card">
+      <div class="card-header"><h2>Block Results</h2></div>
+      <div id="block-results"><p class="empty">Loading...</p></div>
+    </section>
+
+    <!-- Payment log -->
+    <section class="card">
+      <div class="card-header">
+        <h2>Payment Log</h2>
+        <button class="btn btn-primary btn-sm" id="log-beer-btn">🍺 Log a Round</button>
+      </div>
+      <div id="payment-log"><p class="empty">No rounds logged yet.</p></div>
+    </section>
+  </main>
+
+  <!-- Log Beer Modal -->
+  <div class="modal-overlay hidden" id="beer-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Log a Round</h2>
+        <button class="modal-close" id="beer-modal-close">×</button>
+      </div>
+      <form id="beer-form" style="padding:1.5rem;">
+        <div class="form-group">
+          <label>Who paid?</label>
+          <select id="beer-player" required></select>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="beer-date" required>
+        </div>
+        <div class="form-group">
+          <label>Location</label>
+          <input type="text" id="beer-location" placeholder="e.g. Jernbanebyen" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Save</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tiebreaker Modal -->
+  <div class="modal-overlay hidden" id="tiebreak-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>🎯 Shuffleboard Tiebreaker</h2>
+        <button class="modal-close" id="tiebreak-modal-close">×</button>
+      </div>
+      <div style="padding:1.5rem;">
+        <p style="color:var(--muted);margin-bottom:1.5rem;" id="tiebreak-desc"></p>
+        <div class="form-group">
+          <label>Who lost shuffleboard? (→ owes the beer)</label>
+          <select id="tiebreak-loser"></select>
+        </div>
+        <button class="btn btn-primary btn-full" id="tiebreak-save">Save Result</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/beers.js"></script>
+</body>
+</html>
