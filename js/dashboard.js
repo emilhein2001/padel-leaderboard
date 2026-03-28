@@ -133,22 +133,10 @@ document.getElementById('match-form').addEventListener('submit', async (e) => {
     showMatchError('Each player can only appear once per match!'); return;
   }
 
-  const sets = [];
-  let t1wins = 0, t2wins = 0;
-
-  const addSet = (n, t1, t2) => {
-    sets.push({ block_number: n, team1_score: t1, team2_score: t2 });
-    t1 > t2 ? t1wins++ : t2wins++;
-  };
-
-  addSet(1, +document.getElementById('s1t1').value, +document.getElementById('s1t2').value);
-  addSet(2, +document.getElementById('s2t1').value, +document.getElementById('s2t2').value);
-
-  const s3t1 = document.getElementById('s3t1').value;
-  const s3t2 = document.getElementById('s3t2').value;
-  if (s3t1 !== '' && s3t2 !== '') addSet(3, +s3t1, +s3t2);
-
-  const winner_team = t1wins > t2wins ? 1 : 2;
+  const s1t1 = +document.getElementById('s1t1').value;
+  const s1t2 = +document.getElementById('s1t2').value;
+  const sets = [{ block_number: 1, team1_score: s1t1, team2_score: s1t2 }];
+  const winner_team = s1t1 > s1t2 ? 1 : 2;
 
   const { data: matchData, error: matchError } = await db.from('matches').insert({
     team1_player1_id: t1p1, team1_player2_id: t1p2,
