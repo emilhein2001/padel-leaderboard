@@ -1,5 +1,7 @@
 let players = [];
 let currentUser = null;
+let leaderboardYear = 2026;
+let historyYear = 2026;
 
 async function init() {
   const { data: { session } } = await db.auth.getSession();
@@ -10,8 +12,29 @@ async function init() {
   if (playerData) document.getElementById('user-name').textContent = playerData.name;
 
   await loadPlayers();
-  await loadLeaderboard();
-  await loadMatchHistory();
+  await loadLeaderboard(leaderboardYear);
+  await loadMatchHistory(historyYear);
+  setupFilters();
+}
+
+function setupFilters() {
+  document.getElementById('leaderboard-filter').addEventListener('click', async (e) => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    document.querySelectorAll('#leaderboard-filter .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    leaderboardYear = btn.dataset.year === 'all' ? 'all' : +btn.dataset.year;
+    await loadLeaderboard(leaderboardYear);
+  });
+
+  document.getElementById('history-filter').addEventListener('click', async (e) => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    document.querySelectorAll('#history-filter .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    historyYear = btn.dataset.year === 'all' ? 'all' : +btn.dataset.year;
+    await loadMatchHistory(historyYear);
+  });
 }
 
 async function loadPlayers() {
@@ -30,8 +53,14 @@ async function loadPlayers() {
   });
 }
 
-async function loadLeaderboard() {
-  const { data: matches } = await db.from('matches').select('*');
+async function loadLeaderboard(year = 2026) {
+  let query = db.from('matches').select('*');
+  if (year !== 'all') {
+    query = query
+      .gte('played_at', `${year}-01-01T00:00:00`)
+      .lte('played_at', `${year}-12-31T23:59:59`);
+  }
+  const { data: matches } = await query;
 
   const stats = {};
   players.forEach(p => { stats[p.id] = { name: p.name, played: 0, wins: 0, losses: 0 }; });
@@ -69,14 +98,22 @@ async function loadLeaderboard() {
     </table>`;
 }
 
-async function loadMatchHistory() {
-  const { data: matches } = await db
+async function loadMatchHistory(year = 2026) {
+  let query = db
     .from('matches')
     .select('*, match_blocks(*)')
     .order('played_at', { ascending: false })
-    .limit(10);
+    .limit(20);
 
+  if (year !== 'all') {
+    query = query
+      .gte('played_at', `${year}-01-01T00:00:00`)
+      .lte('played_at', `${year}-12-31T23:59:59`);
+  }
+
+  const { data: matches } = await query;
   const historyEl = document.getElementById('match-history');
+
   if (!matches || matches.length === 0) {
     historyEl.innerHTML = '<p class="empty">No matches yet — log your first one! 🎾</p>';
     return;
@@ -153,8 +190,8 @@ document.getElementById('match-form').addEventListener('submit', async (e) => {
 
   document.getElementById('modal-overlay').classList.add('hidden');
   document.getElementById('match-form').reset();
-  await loadLeaderboard();
-  await loadMatchHistory();
+  await loadLeaderboard(leaderboardYear);
+  await loadMatchHistory(historyYear);
 });
 
 function showMatchError(msg) {
