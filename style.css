@@ -100,4 +100,15 @@ header { background: var(--card); border-bottom: 1px solid var(--border); paddin
 .set-row span:first-child { width: 90px; font-size: 0.875rem; color: var(--muted); }
 .set-row input { width: 60px; text-align: center; }
 
+/* Double faults */
+.df-section { margin-top: 1.25rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+.df-section summary { font-size: 0.8rem; font-weight: 600; color: var(--muted); cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; user-select: none; }
+.df-section summary:hover { color: var(--text); }
+.df-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.875rem; }
+.df-item { display: flex; flex-direction: column; gap: 0.25rem; }
+.df-item label { font-size: 0.75rem; color: var(--muted); }
+.df-item input { width: 64px; text-align: center; }
+.df-count { color: var(--muted); font-size: 0.85rem; }
+.match-df { font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem; }
+
 .empty { padding: 2rem; text-align: center; color: var(--muted); }

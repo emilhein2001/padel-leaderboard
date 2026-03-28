@@ -37,6 +37,15 @@ function setupFilters() {
   });
 }
 
+function updateDFLabels() {
+  ['t1p1', 't1p2', 't2p1', 't2p2'].forEach(id => {
+    const sel = document.getElementById(id);
+    const label = document.getElementById(`df-label-${id}`);
+    const name = sel.options[sel.selectedIndex]?.text;
+    label.textContent = (name && name !== 'Select player') ? name : id.toUpperCase();
+  });
+}
+
 async function loadPlayers() {
   const { data } = await db.from('players').select('*').order('name');
   players = data || [];
@@ -50,6 +59,7 @@ async function loadPlayers() {
       opt.textContent = p.name;
       sel.appendChild(opt);
     });
+    sel.addEventListener('change', updateDFLabels);
   });
 }
 
@@ -63,36 +73,51 @@ async function loadLeaderboard(year = 2026) {
   const { data: matches } = await query;
 
   const stats = {};
-  players.forEach(p => { stats[p.id] = { name: p.name, played: 0, wins: 0, losses: 0 }; });
+  players.forEach(p => { stats[p.id] = { name: p.name, played: 0, wins: 0, losses: 0, doubleFaults: 0 }; });
 
   (matches || []).forEach(match => {
-    [match.team1_player1_id, match.team1_player2_id].forEach(pid => {
+    const team1 = [
+      { id: match.team1_player1_id, df: match.t1p1_df || 0 },
+      { id: match.team1_player2_id, df: match.t1p2_df || 0 }
+    ];
+    const team2 = [
+      { id: match.team2_player1_id, df: match.t2p1_df || 0 },
+      { id: match.team2_player2_id, df: match.t2p2_df || 0 }
+    ];
+
+    team1.forEach(({ id: pid, df }) => {
       if (!stats[pid]) return;
       stats[pid].played++;
+      stats[pid].doubleFaults += df;
       match.winner_team === 1 ? stats[pid].wins++ : stats[pid].losses++;
     });
-    [match.team2_player1_id, match.team2_player2_id].forEach(pid => {
+    team2.forEach(({ id: pid, df }) => {
       if (!stats[pid]) return;
       stats[pid].played++;
+      stats[pid].doubleFaults += df;
       match.winner_team === 2 ? stats[pid].wins++ : stats[pid].losses++;
     });
   });
 
-  const sorted = Object.values(stats).sort((a, b) => b.wins - a.wins || a.losses - b.losses);
-  const medals = ['🥇', '🥈', '🥉'];
+  const sorted = Object.values(stats).sort((a, b) =>
+    b.wins - a.wins ||
+    a.losses - b.losses ||
+    a.doubleFaults - b.doubleFaults
+  );
 
   document.getElementById('leaderboard').innerHTML = `
     <table class="leaderboard-table">
-      <thead><tr><th>#</th><th>Player</th><th>Played</th><th>Wins</th><th>Losses</th><th>Win Rate</th></tr></thead>
+      <thead><tr><th>#</th><th>Player</th><th>Played</th><th>Wins</th><th>Losses</th><th>Win Rate</th><th>DF</th></tr></thead>
       <tbody>
         ${sorted.map((p, i) => `
           <tr>
-            <td class="rank">${medals[i] || i + 1}</td>
+            <td class="rank">${i + 1}</td>
             <td class="player-name">${p.name}</td>
             <td>${p.played}</td>
             <td class="wins">${p.wins}</td>
             <td class="losses">${p.losses}</td>
             <td>${p.played > 0 ? Math.round((p.wins / p.played) * 100) + '%' : '-'}</td>
+            <td class="df-count">${p.doubleFaults}</td>
           </tr>`).join('')}
       </tbody>
     </table>`;
@@ -125,6 +150,17 @@ async function loadMatchHistory(year = 2026) {
     const sets = (m.match_blocks || []).sort((a, b) => a.block_number - b.block_number);
     const setsStr = sets.map(s => `${s.team1_score}-${s.team2_score}`).join('  ');
     const date = new Date(m.played_at).toLocaleDateString('en-GB');
+
+    const dfs = [
+      { name: getName(m.team1_player1_id), df: m.t1p1_df },
+      { name: getName(m.team1_player2_id), df: m.t1p2_df },
+      { name: getName(m.team2_player1_id), df: m.t2p1_df },
+      { name: getName(m.team2_player2_id), df: m.t2p2_df },
+    ].filter(x => x.df > 0);
+    const dfStr = dfs.length > 0
+      ? `⚡ ${dfs.map(x => `${x.name}: ${x.df}`).join(', ')}`
+      : '';
+
     return `
       <div class="match-card">
         <div class="match-teams">
@@ -142,6 +178,7 @@ async function loadMatchHistory(year = 2026) {
           <span class="match-sets">${setsStr}</span>
           <span class="match-date">${date}</span>
         </div>
+        ${dfStr ? `<div class="match-df">${dfStr}</div>` : ''}
       </div>`;
   }).join('');
 }
@@ -175,10 +212,16 @@ document.getElementById('match-form').addEventListener('submit', async (e) => {
   const sets = [{ block_number: 1, team1_score: s1t1, team2_score: s1t2 }];
   const winner_team = s1t1 > s1t2 ? 1 : 2;
 
+  const t1p1_df = +document.getElementById('df-t1p1').value || 0;
+  const t1p2_df = +document.getElementById('df-t1p2').value || 0;
+  const t2p1_df = +document.getElementById('df-t2p1').value || 0;
+  const t2p2_df = +document.getElementById('df-t2p2').value || 0;
+
   const { data: matchData, error: matchError } = await db.from('matches').insert({
     team1_player1_id: t1p1, team1_player2_id: t1p2,
     team2_player1_id: t2p1, team2_player2_id: t2p2,
-    winner_team, created_by: currentUser.id
+    winner_team, created_by: currentUser.id,
+    t1p1_df, t1p2_df, t2p1_df, t2p2_df
   }).select().single();
 
   if (matchError) { showMatchError('Error saving match. Try again.'); return; }
