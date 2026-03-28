@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Padel Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="header-logo">🎾 Padel Tracker</div>
+      <div class="header-user">
+        <span id="user-name"></span>
+        <button class="btn btn-outline" id="logout-btn">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div class="card-header"><h2>🏆 Leaderboard</h2></div>
+      <div id="leaderboard"><p class="empty">Loading...</p></div>
+    </section>
+
+    <button class="btn btn-primary btn-lg" id="log-match-btn">+ Log a Match</button>
+
+    <section class="card">
+      <div class="card-header"><h2>📋 Recent Matches</h2></div>
+      <div id="match-history"><p class="empty">Loading...</p></div>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-overlay hidden" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Log a Match</h2>
+        <button class="modal-close" id="modal-close">×</button>
+      </div>
+      <form id="match-form">
+        <div class="teams-grid">
+          <div class="team-section">
+            <h3 class="team1-label">Team 1</h3>
+            <div class="form-group">
+              <label>Player 1</label>
+              <select id="t1p1" required></select>
+            </div>
+            <div class="form-group">
+              <label>Player 2</label>
+              <select id="t1p2" required></select>
+            </div>
+          </div>
+          <div class="vs">VS</div>
+          <div class="team-section">
+            <h3 class="team2-label">Team 2</h3>
+            <div class="form-group">
+              <label>Player 1</label>
+              <select id="t2p1" required></select>
+            </div>
+            <div class="form-group">
+              <label>Player 2</label>
+              <select id="t2p2" required></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="sets-section">
+          <h3>Sets</h3>
+          <div class="set-row">
+            <span>Set 1</span>
+            <input type="number" id="s1t1" min="0" max="7" placeholder="0" required>
+            <span>-</span>
+            <input type="number" id="s1t2" min="0" max="7" placeholder="0" required>
+          </div>
+          <div class="set-row">
+            <span>Set 2</span>
+            <input type="number" id="s2t1" min="0" max="7" placeholder="0" required>
+            <span>-</span>
+            <input type="number" id="s2t2" min="0" max="7" placeholder="0" required>
+          </div>
+          <div class="set-row">
+            <span>Set 3 <small>(optional)</small></span>
+            <input type="number" id="s3t1" min="0" max="7" placeholder="0">
+            <span>-</span>
+            <input type="number" id="s3t2" min="0" max="7" placeholder="0">
+          </div>
+        </div>
+
+        <p id="match-error" class="error-msg hidden"></p>
+        <button type="submit" class="btn btn-primary btn-full">Save Match</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
