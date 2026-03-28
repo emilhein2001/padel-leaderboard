@@ -25,9 +25,11 @@ function calcAge(birthDate) {
   return age;
 }
 
-function computeAllTimeStats(playerId) {
+const STATS_YEAR = new Date().getFullYear();
+
+function computeCurrentYearStats(playerId) {
   let played = 0, wins = 0, points = 0, doubleFaults = 0;
-  allMatches.forEach(match => {
+  allMatches.filter(m => new Date(m.played_at).getFullYear() === STATS_YEAR).forEach(match => {
     const t1s = match.match_blocks?.[0]?.team1_score || 0;
     const t2s = match.match_blocks?.[0]?.team2_score || 0;
     const isT1P1 = match.team1_player1_id === playerId;
@@ -84,7 +86,7 @@ function render() {
   }
 
   const sorted = players
-    .map(p => ({ ...p, stats: computeAllTimeStats(p.id) }))
+    .map(p => ({ ...p, stats: computeCurrentYearStats(p.id) }))
     .sort((a, b) => b.stats.wins - a.stats.wins);
 
   document.getElementById('player-grid').innerHTML = sorted.map((p, rank) => {
@@ -105,6 +107,7 @@ function render() {
         </div>
         <div class="player-card-name">${p.name}</div>
         ${p.full_name ? `<div class="player-card-nickname">${p.full_name}</div>` : ''}
+        <div class="player-stats-year">${STATS_YEAR} Season</div>
         <div class="player-stats-grid">
           <div class="player-stat">
             <div class="player-stat-value wins">${s.wins}</div>
