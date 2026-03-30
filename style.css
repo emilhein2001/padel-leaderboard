@@ -118,15 +118,26 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
 .modal form { padding: 1.5rem; }
 
 /* ── MATCH FORM ── */
-.teams-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: start; margin-bottom: 1.5rem; }
-.team-section h3 { font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
-.team1-label { color: var(--blue); }
-.team2-label { color: var(--amber); }
-.vs { display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--muted); padding-top: 2rem; }
-.sets-section h3 { font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.75rem; }
-.set-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.625rem; }
-.set-row span:first-child { width: 90px; font-size: 0.875rem; color: var(--muted); }
-.set-row input { width: 60px; text-align: center; }
+.picker-hint { font-size: 0.8rem; color: var(--muted); text-align: center; margin-bottom: 0.75rem; }
+.picker-hint strong { color: var(--blue); }
+.player-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem; margin-bottom: 1rem; }
+.picker-btn { position: relative; padding: 0.9rem 1rem; border-radius: 10px; border: 2px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; font-weight: 600; cursor: pointer; transition: border-color 0.15s, background 0.15s, color 0.15s; text-align: center; }
+.picker-btn:hover:not(.t1-active):not(.t2-active) { border-color: var(--muted); }
+.picker-btn.t1-active { border-color: var(--blue); background: rgba(59,130,246,0.12); color: var(--blue); }
+.picker-btn.t2-active { border-color: var(--amber); background: rgba(245,158,11,0.12); color: var(--amber); }
+.p-badge { position: absolute; top: 4px; right: 7px; font-size: 0.6rem; font-weight: 700; opacity: 0.75; }
+.teams-vs-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem; }
+.team-vs-pill { flex: 1; text-align: center; padding: 0.45rem 0.5rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: var(--muted); background: var(--bg); border: 1px solid var(--border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: all 0.2s; }
+.team-vs-pill.t1-pill { color: var(--blue); border-color: rgba(59,130,246,0.35); background: rgba(59,130,246,0.08); }
+.team-vs-pill.t2-pill { color: var(--amber); border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.08); }
+.vs-text { font-size: 0.75rem; font-weight: 700; color: var(--muted); flex-shrink: 0; }
+.score-block { margin-bottom: 1.25rem; }
+.score-row { display: flex; align-items: center; justify-content: center; gap: 0.625rem; }
+.score-name { flex: 1; font-size: 0.75rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.score-name.t1-color { text-align: right; color: var(--blue); }
+.score-name.t2-color { text-align: left; color: var(--amber); }
+.score-row input { width: 64px; height: 52px; font-size: 1.6rem; font-weight: 700; text-align: center; flex-shrink: 0; }
+.score-dash { font-size: 1.25rem; font-weight: 700; color: var(--muted); flex-shrink: 0; }
 .df-section { margin-top: 1.25rem; border-top: 1px solid var(--border); padding-top: 1rem; }
 .df-section summary { font-size: 0.8rem; font-weight: 600; color: var(--muted); cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; user-select: none; }
 .df-section summary:hover { color: var(--text); }

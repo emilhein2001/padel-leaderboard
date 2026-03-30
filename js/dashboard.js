@@ -1,4 +1,5 @@
 let players = [];
+let team1Ids = [];
 let currentUser = null;
 let leaderboardYear = 2026;
 let historyYear = 2026;
@@ -33,28 +34,63 @@ function setupFilters() {
   });
 }
 
-function updateDFLabels() {
-  ['t1p1', 't1p2', 't2p1', 't2p2'].forEach(id => {
-    const sel = document.getElementById(id);
-    const label = document.getElementById(`df-label-${id}`);
-    const name = sel.options[sel.selectedIndex]?.text;
-    label.textContent = (name && name !== 'Select player') ? name : id.toUpperCase();
-  });
+function renderPicker() {
+  const getName = id => players.find(p => p.id === id)?.name || '?';
+  const team2Ids = players.filter(p => !team1Ids.includes(p.id)).map(p => p.id);
+  const ready = team1Ids.length === 2;
+
+  document.getElementById('player-picker').innerHTML = players.map(p => {
+    const isT1 = team1Ids.includes(p.id);
+    const isT2 = ready && !isT1;
+    const cls = isT1 ? ' t1-active' : isT2 ? ' t2-active' : '';
+    const badge = isT1 ? '<span class="p-badge">T1</span>' : isT2 ? '<span class="p-badge">T2</span>' : '';
+    return `<button type="button" class="picker-btn${cls}" data-id="${p.id}">${badge}${p.name}</button>`;
+  }).join('');
+
+  const hints = [
+    'Tap 2 players for <strong>Team 1</strong>',
+    'One more for <strong>Team 1</strong>…',
+    '✓ Teams set — enter the score'
+  ];
+  document.getElementById('picker-hint').innerHTML = hints[Math.min(team1Ids.length, 2)];
+
+  const t1pill = document.getElementById('t1-pill');
+  const t2pill = document.getElementById('t2-pill');
+  if (ready) {
+    t1pill.textContent = team1Ids.map(getName).join(' & ');
+    t1pill.className = 'team-vs-pill t1-pill';
+    t2pill.textContent = team2Ids.map(getName).join(' & ');
+    t2pill.className = 'team-vs-pill t2-pill';
+    document.getElementById('score-t1-name').textContent = team1Ids.map(getName).join(' & ');
+    document.getElementById('score-t2-name').textContent = team2Ids.map(getName).join(' & ');
+    const dfIds = ['df-label-t1p1','df-label-t1p2','df-label-t2p1','df-label-t2p2'];
+    [team1Ids[0], team1Ids[1], team2Ids[0], team2Ids[1]].forEach((id, i) => {
+      document.getElementById(dfIds[i]).textContent = getName(id);
+    });
+  } else {
+    t1pill.textContent = team1Ids.length ? getName(team1Ids[0]) + ' & ?' : '—';
+    t1pill.className = 'team-vs-pill';
+    t2pill.textContent = '—';
+    t2pill.className = 'team-vs-pill';
+    document.getElementById('score-t1-name').textContent = 'T1';
+    document.getElementById('score-t2-name').textContent = 'T2';
+  }
+  document.getElementById('save-match-btn').disabled = !ready;
+}
+
+function resetModal() {
+  team1Ids = [];
+  renderPicker();
+  document.getElementById('s1t1').value = '';
+  document.getElementById('s1t2').value = '';
+  ['df-t1p1','df-t1p2','df-t2p1','df-t2p2'].forEach(id => document.getElementById(id).value = 0);
+  document.getElementById('match-error').classList.add('hidden');
 }
 
 async function loadPlayers() {
   const { data } = await db.from('players').select('*').order('name');
   players = data || [];
-  ['t1p1', 't1p2', 't2p1', 't2p2'].forEach(id => {
-    const sel = document.getElementById(id);
-    sel.innerHTML = '<option value="">Select player</option>';
-    players.forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p.id; opt.textContent = p.name;
-      sel.appendChild(opt);
-    });
-    sel.addEventListener('change', updateDFLabels);
-  });
+  renderPicker();
 }
 
 /* ── Leaderboard ── */
@@ -324,16 +360,29 @@ async function loadMatchHistory(year) {
 
 /* ── Log Match Modal ── */
 document.getElementById('log-match-btn').addEventListener('click', () => document.getElementById('modal-overlay').classList.remove('hidden'));
-document.getElementById('modal-close').addEventListener('click', () => document.getElementById('modal-overlay').classList.add('hidden'));
-document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.add('hidden'); });
+document.getElementById('modal-close').addEventListener('click', () => { document.getElementById('modal-overlay').classList.add('hidden'); resetModal(); });
+document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) { document.getElementById('modal-overlay').classList.add('hidden'); resetModal(); } });
+
+document.getElementById('player-picker').addEventListener('click', e => {
+  const btn = e.target.closest('.picker-btn');
+  if (!btn) return;
+  const id = btn.dataset.id;
+  if (team1Ids.includes(id)) {
+    team1Ids = team1Ids.filter(x => x !== id);
+  } else if (team1Ids.length < 2) {
+    team1Ids.push(id);
+  }
+  renderPicker();
+  document.getElementById('match-error').classList.add('hidden');
+});
 
 document.getElementById('match-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const t1p1 = document.getElementById('t1p1').value, t1p2 = document.getElementById('t1p2').value;
-  const t2p1 = document.getElementById('t2p1').value, t2p2 = document.getElementById('t2p2').value;
+  const team2Ids = players.filter(p => !team1Ids.includes(p.id)).map(p => p.id);
+  if (team1Ids.length !== 2 || team2Ids.length !== 2) { showMatchError('Pick 2 players for Team 1.'); return; }
 
-  if (new Set([t1p1, t1p2, t2p1, t2p2]).size !== 4) { showMatchError('Each player can only appear once!'); return; }
-
+  const [t1p1, t1p2] = team1Ids;
+  const [t2p1, t2p2] = team2Ids;
   const s1t1 = +document.getElementById('s1t1').value, s1t2 = +document.getElementById('s1t2').value;
   const winner_team = s1t1 > s1t2 ? 1 : 2;
   const t1p1_df = +document.getElementById('df-t1p1').value || 0, t1p2_df = +document.getElementById('df-t1p2').value || 0;
@@ -349,7 +398,7 @@ document.getElementById('match-form').addEventListener('submit', async (e) => {
   if (blocksError) { showMatchError('Error saving score.'); return; }
 
   document.getElementById('modal-overlay').classList.add('hidden');
-  document.getElementById('match-form').reset();
+  resetModal();
   await Promise.all([loadLeaderboard(leaderboardYear), loadMatchHistory(historyYear)]);
 });
 

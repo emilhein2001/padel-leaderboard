@@ -48,52 +48,37 @@
         <button class="modal-close" id="modal-close">×</button>
       </div>
       <form id="match-form">
-        <div class="teams-grid">
-          <div class="team-section">
-            <h3 class="team1-label">Team 1</h3>
-            <div class="form-group">
-              <label>Player 1</label>
-              <select id="t1p1" required></select>
-            </div>
-            <div class="form-group">
-              <label>Player 2</label>
-              <select id="t1p2" required></select>
-            </div>
-          </div>
-          <div class="vs">VS</div>
-          <div class="team-section">
-            <h3 class="team2-label">Team 2</h3>
-            <div class="form-group">
-              <label>Player 1</label>
-              <select id="t2p1" required></select>
-            </div>
-            <div class="form-group">
-              <label>Player 2</label>
-              <select id="t2p2" required></select>
-            </div>
-          </div>
+        <p class="picker-hint" id="picker-hint">Tap 2 players for <strong>Team 1</strong></p>
+        <div class="player-picker" id="player-picker"></div>
+
+        <div class="teams-vs-row">
+          <div class="team-vs-pill" id="t1-pill">—</div>
+          <span class="vs-text">vs</span>
+          <div class="team-vs-pill" id="t2-pill">—</div>
         </div>
-        <div class="sets-section">
-          <h3>Score</h3>
-          <div class="set-row">
-            <span>Team 1</span>
+
+        <div class="score-block">
+          <div class="score-row">
+            <span class="score-name t1-color" id="score-t1-name">T1</span>
             <input type="number" id="s1t1" min="0" max="99" placeholder="0" required>
-            <span>-</span>
+            <span class="score-dash">–</span>
             <input type="number" id="s1t2" min="0" max="99" placeholder="0" required>
-            <span>Team 2</span>
+            <span class="score-name t2-color" id="score-t2-name">T2</span>
           </div>
         </div>
+
         <details class="df-section">
           <summary>⚡ Double Faults <small>(optional)</small></summary>
           <div class="df-grid">
-            <div class="df-item"><label id="df-label-t1p1">Team 1 · P1</label><input type="number" id="df-t1p1" min="0" value="0"></div>
-            <div class="df-item"><label id="df-label-t1p2">Team 1 · P2</label><input type="number" id="df-t1p2" min="0" value="0"></div>
-            <div class="df-item"><label id="df-label-t2p1">Team 2 · P1</label><input type="number" id="df-t2p1" min="0" value="0"></div>
-            <div class="df-item"><label id="df-label-t2p2">Team 2 · P2</label><input type="number" id="df-t2p2" min="0" value="0"></div>
+            <div class="df-item"><label id="df-label-t1p1">P1</label><input type="number" id="df-t1p1" min="0" value="0"></div>
+            <div class="df-item"><label id="df-label-t1p2">P2</label><input type="number" id="df-t1p2" min="0" value="0"></div>
+            <div class="df-item"><label id="df-label-t2p1">P3</label><input type="number" id="df-t2p1" min="0" value="0"></div>
+            <div class="df-item"><label id="df-label-t2p2">P4</label><input type="number" id="df-t2p2" min="0" value="0"></div>
           </div>
         </details>
+
         <p id="match-error" class="error-msg hidden"></p>
-        <button type="submit" class="btn btn-primary btn-full">Save Match</button>
+        <button type="submit" class="btn btn-primary btn-full" id="save-match-btn" disabled>Save Match</button>
       </form>
     </div>
   </div>
