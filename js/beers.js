@@ -153,6 +153,8 @@ function render() {
   const blockResults = blocks.map((block, bi) => {
     const blockNumber = bi + 1;
     const blockYear = block[0] ? new Date(block[0].played_at).getFullYear() : currentYear;
+    // Year-relative block number — tiebreakers are always stored with this number
+    const yearBlockNumber = blocks.slice(0, bi).filter(b => b[0] && new Date(b[0].played_at).getFullYear() === blockYear).length + 1;
     const lastMatchDate = block[block.length - 1] ? new Date(block[block.length - 1].played_at).toLocaleDateString('en-GB') : '';
     const stats = getBlockStats(block);
     const ranked = rankBlock(stats);
@@ -165,21 +167,21 @@ function render() {
       last[1].points === secondLast[1].points &&
       last[1].dfs === secondLast[1].dfs;
 
-    const tiebreaker = tiebreakers.find(t => t.block_number === blockNumber && t.year === blockYear);
+    const tiebreaker = tiebreakers.find(t => t.block_number === yearBlockNumber && t.year === blockYear);
     let beerPlayerId = null, status = 'clear';
 
     if (isShuffleTie) {
       if (tiebreaker) { beerPlayerId = tiebreaker.beer_player_id; status = 'resolved'; }
       else {
         status = 'needs-tiebreak';
-        return { blockNumber, blockYear, lastMatchDate, ranked, beerPlayerId: null, status, tiedIds: [last[0], secondLast[0]], stats };
+        return { blockNumber, yearBlockNumber, blockYear, lastMatchDate, ranked, beerPlayerId: null, status, tiedIds: [last[0], secondLast[0]], stats };
       }
     } else {
       beerPlayerId = last[0];
     }
 
     if (beerPlayerId && beersOwed[beerPlayerId] !== undefined) beersOwed[beerPlayerId]++;
-    return { blockNumber, blockYear, lastMatchDate, ranked, beerPlayerId, status, stats };
+    return { blockNumber, yearBlockNumber, blockYear, lastMatchDate, ranked, beerPlayerId, status, stats };
   }).filter(Boolean);
 
   const beersPaid = {};
@@ -246,7 +248,7 @@ function renderBlockResults(blockResults) {
     if (b.status === 'needs-tiebreak') {
       const names = b.tiedIds.map(id => getName(id)).join(' vs ');
       loserHTML = `<span class="block-result-loser needs-tiebreak">⚠️ Tie: ${names}</span>
-        <button class="btn btn-outline tiebreak-btn" onclick="openTiebreak(${b.blockNumber}, ${b.blockYear}, ${JSON.stringify(b.tiedIds)})">Resolve 🎯</button>`;
+        <button class="btn btn-outline tiebreak-btn" onclick="openTiebreak(${b.yearBlockNumber}, ${b.blockYear}, ${JSON.stringify(b.tiedIds)})">Resolve 🎯</button>`;
     } else {
       loserHTML = `<span class="block-result-loser resolved">🍺 ${getName(b.beerPlayerId)} owes a beer</span>`;
     }
@@ -264,8 +266,8 @@ function renderBlockResults(blockResults) {
   renderPagination('block-pagination', blockResults.length, blockPage, 'setBlockPage');
 }
 
-function openTiebreak(blockNumber, blockYear, tiedIds) {
-  pendingTiebreakBlock = { blockNumber, blockYear };
+function openTiebreak(yearBlockNumber, blockYear, tiedIds) {
+  pendingTiebreakBlock = { blockNumber: yearBlockNumber, blockYear };
   const getName = id => players.find(p => p.id === id)?.name || '?';
   document.getElementById('tiebreak-desc').textContent =
     `Match ${blockNumber} ended in a tie between ${tiedIds.map(getName).join(' and ')} on wins, points, and double faults. Who lost the shuffleboard game?`;
